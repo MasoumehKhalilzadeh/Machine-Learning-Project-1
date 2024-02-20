@@ -1,4 +1,8 @@
-Python Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
 
 import numpy as np
 import pandas as pd
@@ -24,7 +28,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 import matplotlib
@@ -34,6 +37,10 @@ matplotlib.rc('axes.spines', top = False, right = False)
 matplotlib.rc('axes', grid = False)
 matplotlib.rc('axes', facecolor = 'white')
 
+
+# In[ ]:
+
+
 data = pd.read_excel('/content/Data.xlsx')
 data.head()
 data.columns = ['id', 'age', 'gender', 'height', 'weight', 'ap_hi', 'ap_lo',
@@ -42,29 +49,8 @@ data.drop(['id'], axis=1, inplace=True)
 
 data.info()
 
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 70000 entries, 0 to 69999
-Data columns (total 12 columns):
- #   Column       Non-Null Count  Dtype
----  ------       --------------  -----
- 0   age          70000 non-null  int64
- 1   gender       70000 non-null  int64
- 2   height       70000 non-null  int64
- 3   weight       70000 non-null  int64
- 4   ap_hi        70000 non-null  int64
- 5   ap_lo        70000 non-null  int64
- 6   cholesterol  70000 non-null  int64
- 7   gluc         70000 non-null  int64
- 8   smoke        70000 non-null  int64
- 9   alco         70000 non-null  int64
- 10  active       70000 non-null  int64
- 11  cardio       70000 non-null  int64
-dtypes: int64(12)
-memory usage: 6.4 MB
-data.describe()
-data.duplicated().sum()
-data.drop_duplicates(inplace=True)
-data['age'] = (data['age'] / 365).round().astype('int')
+
+# In[ ]:
 
 
 num_cols = ['age','height','weight','ap_hi','ap_lo']
@@ -73,20 +59,36 @@ data[num_cols].boxplot()
 plt.title("Numerical variables in the dataset", fontsize=20)
 plt.show()
 
+
+# In[ ]:
+
+
 outliers = len(data[(data["ap_hi"]>=250)])+len(data[(data["ap_hi"]<0)])+len(data[(data["ap_lo"]>=200)])+len(data[(data["ap_lo"]<0)])
 print(f'percent missing: {round(outliers/len(data)*100,1)}%')
-percent missing: 1.4%
+
+
+
+# In[ ]:
+
 
 #Filtering out the unrealistic data of Systolic blood pressure and Diastolic blood pressure
 data = data[ (data['ap_lo'] >= 0) & (data['ap_hi'] >= 0) ]  #remove negative values
 data = data[ (data['ap_lo'] < 200) & (data['ap_hi'] < 250) ]  #remove fishy data points
 data = data[ (data['ap_lo'] < data['ap_hi']) ]  #remove systolic higher than diastolic
 
+
+# In[ ]:
+
+
 num_cols = ['age','height','weight','ap_hi','ap_lo']
 plt.figure(figsize=(18,9))
 data[num_cols].boxplot()
 plt.title("Numerical variables in the dataset", fontsize=20)
 plt.show()
+
+
+# In[ ]:
+
 
 fig = make_subplots(rows=2, cols=2, subplot_titles=("Height Distribution", "Weight Distribution","ap_hi","ap_lo"))
 
@@ -116,6 +118,10 @@ fig.update_layout(title_text="Histograph", height=700)
 
 fig.show()
 
+
+# In[ ]:
+
+
 outlier_df = pd.DataFrame()
 
 feat = ['age','height','weight','ap_lo','ap_hi']
@@ -132,11 +138,18 @@ for ft in feat:
 
 outlier_df
 
+
+# In[ ]:
+
+
 num_cols = ['age','height','weight','ap_hi','ap_lo']
 plt.figure(figsize=(18,9))
 data[num_cols].boxplot()
 plt.title("Numerical variables in the dataset", fontsize=20)
 plt.show()
+
+
+# In[ ]:
 
 
 #Dataset after cleaning
@@ -154,6 +167,10 @@ ax.set_xticklabels(('0', '1'))
 
 counts = data['cardio'].value_counts()
 print(counts)
+
+
+# In[ ]:
+
 
 rcParams['figure.figsize'] = 18, 8
 sns.set_palette("Paired")
@@ -185,10 +202,18 @@ rcParams['figure.figsize'] = 11, 8
 sns.set_palette("Paired")
 sns.countplot(x='gender', hue='cardio', data = data);
 
+
+# In[ ]:
+
+
 data.groupby('gender')['height'].mean()
 data['gender'].value_counts()
 data.groupby('gender')['alco'].sum()
 pd.crosstab(data['cardio'],data['gender'],normalize=True)
+
+
+
+# In[ ]:
 
 
 corr = data.corr()
@@ -196,6 +221,10 @@ cmap = sns.diverging_palette(220, 10, as_cmap=True)
 # Generate a mask for the upper triangle
 mask = np.zeros_like(corr, dtype=np.bool)
 mask[np.triu_indices_from(mask)] = True
+
+
+# In[ ]:
+
 
 # Set up the matplotlib figure
 f, ax = plt.subplots(figsize=(11, 9))
@@ -208,22 +237,31 @@ data['BMI'] = data['weight'] / data['height'] / data['height'] * 10000
 data['pulse pressure'] = data['ap_hi'] - data['ap_lo']
 
 
+# In[ ]:
+
+
 plt.rcParams['figure.figsize'] = (20, 15) 
 sns.heatmap(data.corr(), annot = True, linewidths=.5, cmap="PuBu")
 plt.title('Corelation Between Features', fontsize = 30)
 plt.show()
+
+
+# In[ ]:
+
 
 #Train-test-split for non-scaled data
 X = data.drop(['cardio','height','alco'], axis=1) #features 
 y = data['cardio']  #target feature
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle = True)
-
 #Splitted Data
 print('X_train shape is ' , X_train.shape)
 print('X_test shape is ' , X_test.shape)
 print('y_train shape is ' , y_train.shape)
 print('y_test shape is ' , y_test.shape)
+
+
+# In[ ]:
 
 
 # Random Forest
@@ -234,6 +272,10 @@ rf.fit(X_train, y_train)
 # Use the predict_proba() method to obtain the predicted probabilities
 y_proba = rf.predict_proba(X_test)[:, 1]
 
+
+# In[ ]:
+
+
 # Evaluate the performance of your model at different decision thresholds
 for threshold in [0.3, 0.4, 0.5, 0.6, 0.7]:
     y_pred = (y_proba > threshold).astype(int)
@@ -243,10 +285,18 @@ for threshold in [0.3, 0.4, 0.5, 0.6, 0.7]:
     auc = roc_auc_score(y_test, y_proba)
     print(f"Threshold: {threshold:.1f}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1-score: {f1:.3f}, AUC: {auc:.3f}")
   
+
+
+# In[ ]:
+
+
 # Choose the new decision threshold that optimizes your chosen metric
 new_threshold = 0.5
 # Use the new decision threshold to convert the predicted probabilities into binary predictions
 y_pred = (y_proba > new_threshold).astype(int)
+
+
+# In[ ]:
 
 
 # Random Forest Model Evaluation
@@ -255,6 +305,10 @@ print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
 cm = confusion_matrix(y_test, y_pred)
+
+
+# In[ ]:
+
 
 # Plot confusion matrix
 fig, ax = plt.subplots()
@@ -268,6 +322,10 @@ ax.set(xticks=np.arange(cm.shape[1]),
        ylabel='True label',
        xlabel='Predicted label')
 
+
+# In[ ]:
+
+
 # Add labels to each cell
 thresh = cm.max() / 2.
 for i in range(cm.shape[0]):
@@ -278,6 +336,10 @@ for i in range(cm.shape[0]):
 
 fig.tight_layout()
 plt.show()
+
+
+# In[ ]:
+
 
 #we perform some Standardization
 cardio_scaled=data.copy()
@@ -294,12 +356,20 @@ y_scaled = cardio_scaled['cardio']  #target feature
 
 X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled = train_test_split(X_scaled, y_scaled, test_size=0.2, random_state=42, shuffle = True)
 
+
+# In[ ]:
+
+
 #Splitted Data
 
 print('X_train shape is ' , X_train.shape)
 print('X_test shape is ' , X_test.shape)
 print('y_train shape is ' , y_train.shape)
 print('y_test shape is ' , y_test.shape)
+
+
+# In[ ]:
+
 
 params = {'n_neighbors':list(range(0, 51)),
           'weights':['uniform', 'distance'],
@@ -310,23 +380,43 @@ knn_grid_cv = GridSearchCV(knn, param_grid=params, cv=10)
 knn_grid_cv.fit(X_train, y_train)
 print("Best Hyper Parameters:\n",knn_grid_cv.best_params_)"""
 
+
+# In[ ]:
+
+
 print("Best Hyper Parameters: {'n_neighbors': 50, 'p': 1, 'weights': 'uniform'}")
 Best Hyper Parameters: {'n_neighbors': 50, 'p': 1, 'weights': 'uniform'}
 from sklearn.neighbors import KNeighborsClassifier #KNN Model
 
 knn = KNeighborsClassifier(n_neighbors=50, p=1, weights='uniform')
-knn.fit(X_train_scaled, y_train_scaled) 
+knn.fit(X_train_scaled, y_train_scaled)
+
+
+# In[ ]:
+
 
 from sklearn.model_selection import cross_val_score
 
 scores = cross_val_score(knn, X_train_scaled, y_train_scaled, cv=10)
 print('KNN Model gives an average accuracy of {0:.2f} % with minimun of {1:.2f} % and maximum of {2:.2f} % accuracy'.format(scores.mean() * 100, scores.min() * 100, scores.max() * 100))
 
+
+# In[ ]:
+
+
 Y_hat = knn.predict(X_test_scaled)
 print(classification_report(y_test_scaled, Y_hat))
 
+
+# In[ ]:
+
+
 # Compute confusion matrix
 cm = confusion_matrix(y_test_scaled, Y_hat)
+
+
+# In[ ]:
+
 
 # Plot confusion matrix
 fig, ax = plt.subplots()
@@ -340,6 +430,10 @@ ax.set(xticks=np.arange(cm.shape[1]),
        ylabel='True label',
        xlabel='Predicted label')
 
+
+# In[ ]:
+
+
 # Add labels to each cell
 thresh = cm.max() / 2.
 for i in range(cm.shape[0]):
@@ -350,3 +444,4 @@ for i in range(cm.shape[0]):
 
 fig.tight_layout()
 plt.show()
+
