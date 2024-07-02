@@ -312,6 +312,20 @@ print('y_test shape is ' , y_test.shape)
 
 Confusion Matrix Parameters
 
+
+
+<img width="500" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/0b253150-3e14-4124-964a-91d9998a0c4a">
+
+
+Definition of performance metrics
+
+<img width="454" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/0b7bb1ec-64c2-4420-a04d-a794ea6f1e39">
+
+
+
+
+## Random Forest Performance
+
 ```python
 
 # Random Forest
@@ -335,20 +349,50 @@ for threshold in [0.3, 0.4, 0.5, 0.6, 0.7]:
     print(f"Threshold: {threshold:.1f}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1-score: {f1:.3f}, AUC: {auc:.3f}")
 ```
 
+```python
+# Choose the new decision threshold that optimizes your chosen metric
+new_threshold = 0.5
+# Use the new decision threshold to convert the predicted probabilities into binary predictions
+y_pred = (y_proba > new_threshold).astype(int)
 
-<img width="500" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/0b253150-3e14-4124-964a-91d9998a0c4a">
+```
 
+```python
 
-Definition of performance metrics
+# Random Forest Model Evaluation
+from sklearn.metrics import confusion_matrix, classification_report
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
 
-<img width="454" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/0b7bb1ec-64c2-4420-a04d-a794ea6f1e39">
+cm = confusion_matrix(y_test, y_pred)
+```
 
-
-
-
-## Random Forest Performance
 
 <img width="415" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/5668aa29-1ba4-4abd-92f1-10cfe3bbe55f">
+
+```python
+# Plot confusion matrix
+fig, ax = plt.subplots()
+im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+ax.figure.colorbar(im, ax=ax)
+ax.set(xticks=np.arange(cm.shape[1]),
+       yticks=np.arange(cm.shape[0]),
+       xticklabels=['Negative', 'Positive'],
+       yticklabels=['Negative', 'Positive'],
+       title='Confusion matrix',
+       ylabel='True label',
+       xlabel='Predicted label')
+# Add labels to each cell
+thresh = cm.max() / 2.
+for i in range(cm.shape[0]):
+    for j in range(cm.shape[1]):
+        ax.text(j, i, format(cm[i, j], 'd'),
+                ha="center", va="center",
+                color="white" if cm[i, j] > thresh else "black")
+
+fig.tight_layout()
+plt.show()
+```
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/a3dfcfd4-0abc-4684-8cf3-8dbc7f820fd4)
 
@@ -357,9 +401,100 @@ Based on the accuracy, we can say that the model correctly predicted the outcome
 
 ## The K-Nearest Neighbors Performance
 
+```python
+#we perform some Standardization
+cardio_scaled=data.copy()
+
+columns_to_scale = ['age', 'weight', 'ap_hi', 'ap_lo','cholesterol','gender','BMI','height','pulse pressure']
+
+scaler = StandardScaler()
+cardio_scaled[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
+
+cardio_scaled.head()
+
+X_scaled = cardio_scaled.drop(['cardio'], axis=1) #features 
+y_scaled = cardio_scaled['cardio']  #target feature
+
+X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled = train_test_split(X_scaled, y_scaled, test_size=0.2, random_state=42, shuffle = True)
+
+```
+
+```python
+#Splitted Data
+
+print('X_train shape is ' , X_train.shape)
+print('X_test shape is ' , X_test.shape)
+print('y_train shape is ' , y_train.shape)
+print('y_test shape is ' , y_test.shape)
+```
+
+
+```python
+params = {'n_neighbors':list(range(0, 51)),
+          'weights':['uniform', 'distance'],
+          'p':[1,2]}
+
+"""knn = KNeighborsClassifier()
+knn_grid_cv = GridSearchCV(knn, param_grid=params, cv=10) 
+knn_grid_cv.fit(X_train, y_train)
+print("Best Hyper Parameters:\n",knn_grid_cv.best_params_)"""
+```
+
+```python
+print("Best Hyper Parameters: {'n_neighbors': 50, 'p': 1, 'weights': 'uniform'}")
+Best Hyper Parameters: {'n_neighbors': 50, 'p': 1, 'weights': 'uniform'}
+from sklearn.neighbors import KNeighborsClassifier #KNN Model
+
+knn = KNeighborsClassifier(n_neighbors=50, p=1, weights='uniform')
+knn.fit(X_train_scaled, y_train_scaled)
+```
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(knn, X_train_scaled, y_train_scaled, cv=10)
+print('KNN Model gives an average accuracy of {0:.2f} % with minimun of {1:.2f} % and maximum of {2:.2f} % accuracy'.format(scores.mean() * 100, scores.min() * 100, scores.max() * 100))
+
+Y_hat = knn.predict(X_test_scaled)
+print(classification_report(y_test_scaled, Y_hat))
+
+```
+
 
 
 <img width="418" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/57638864-c213-48a9-a482-42cb495504db">
+
+```python
+# Compute confusion matrix
+cm = confusion_matrix(y_test_scaled, Y_hat)
+
+```
+
+```python
+
+# Plot confusion matrix
+fig, ax = plt.subplots()
+im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+ax.figure.colorbar(im, ax=ax)
+ax.set(xticks=np.arange(cm.shape[1]),
+       yticks=np.arange(cm.shape[0]),
+       xticklabels=['Negative', 'Positive'],
+       yticklabels=['Negative', 'Positive'],
+       title='Confusion matrix',
+       ylabel='True label',
+       xlabel='Predicted label')
+
+# Add labels to each cell
+thresh = cm.max() / 2.
+for i in range(cm.shape[0]):
+    for j in range(cm.shape[1]):
+        ax.text(j, i, format(cm[i, j], 'd'),
+                ha="center", va="center",
+                color="white" if cm[i, j] > thresh else "black")
+
+fig.tight_layout()
+plt.show()
+```
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/b4775205-dcbf-4815-8cf6-a6319d6e338a)
 
@@ -368,6 +503,7 @@ Based on the accuracy, we can say that the model correctly predicted the outcome
 
 
 ## Logistic Regression Performance
+
 
 <img width="413" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/d1c53635-ee31-43f5-8bf6-14df70a1203e">
 
