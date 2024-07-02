@@ -156,6 +156,7 @@ Definition of performance metrics
 ## Random Forest Performance
 
 <img width="415" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/5668aa29-1ba4-4abd-92f1-10cfe3bbe55f">
+
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/a3dfcfd4-0abc-4684-8cf3-8dbc7f820fd4)
 
 
@@ -166,6 +167,7 @@ Based on the accuracy, we can say that the model correctly predicted the outcome
 
 
 <img width="418" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/57638864-c213-48a9-a482-42cb495504db">
+
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/b4775205-dcbf-4815-8cf6-a6319d6e338a)
 
 
@@ -175,6 +177,7 @@ Based on the accuracy, we can say that the model correctly predicted the outcome
 ## Logistic Regression Performance
 
 <img width="413" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/d1c53635-ee31-43f5-8bf6-14df70a1203e">
+
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/766120f6-8b1a-47ef-b4ba-fb0256d4fb88)
 
 As can be seen from the results, the accuracy of logistic regression is almost the same as the KNN algorithm.
