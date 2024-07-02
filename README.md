@@ -33,6 +33,16 @@ Cardiovascular diseases (CVDs) are the most frequent reason for death nowadays. 
 
 In this project, a dataset of 70000 patients has been analyzed which includes 11 attributes and the target variable. The dataset is obtained from Kaggle, a public data repository for datasets. We investigated this dataset to predict the presence or absence of Cardiovascular diseases based on the provided features. The attributes are Age, Gender, Height, Weight, Systolic blood pressure, Diastolic blood pressure, Cholesterol (1: normal, 2: above normal, 3: well above normal), Glucose (1: normal, 2: above normal, 3: well above normal), Smoking, Alcohol intake, Physical activity. Our target variable is whether a person has CVD or does not.
 
+```python
+data = pd.read_excel('/content/Data.xlsx')
+data.head()
+data.columns = ['id', 'age', 'gender', 'height', 'weight', 'ap_hi', 'ap_lo',
+       'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
+data.drop(['id'], axis=1, inplace=True)
+
+data.info()
+```
+<img width="553" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/158f4473-4a00-41a3-94a5-d3e17b577b97">
 
 
 ## Algorithm Definition
@@ -57,7 +67,18 @@ The required steps for model building to predict CVD are as follows:
 - These two variables cannot be negative, so we removed the negative values too.
 - According to the American Heart Association, if the Systolic blood pressure and Diastolic blood pressure values exceed 180/120 mm Hg, it will be a hypertensive crisis. So, for safety, we considered the values greater than 250 for Systolic blood pressure and 200 for Diastolic blood pressure as outliers and they need to be removed.
 - I checked the number of duplicate observations, we removed 24 duplicated observations from the dataset.
-- Next step is to investigate the outliers, we have visualized the numerical quantities in the dataset as boxplots, to have a better sense of the outliers. The boxplot of numerical variables like “age”, “height”,” weight”,”ap_hi” and “ap_lo” is as below:
+
+
+```python
+num_cols = ['age','height','weight','ap_hi','ap_lo']
+plt.figure(figsize=(18,9))
+data[num_cols].boxplot()
+plt.title("Numerical variables in the dataset", fontsize=20)
+plt.show()
+```
+
+
+- The next step is to investigate the outliers, we have visualized the numerical quantities in the dataset as boxplots, to have a better sense of the outliers. The boxplot of numerical variables like “age”, “height”,” weight”,”ap_hi” and “ap_lo” is as below:
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/8dfc4095-0122-431c-9145-503421633058)
 
@@ -65,6 +86,28 @@ There are too many outliers and if we remove all the outliers, then almost 10% o
 
 **Clamping** is a statistical process used to replace extreme values or outliers with more representative values. One method of clamping involves using the first and third quartile of a data set to identify potential outliers. The first quartile is the value below which 25% of the data falls, while the third quartile is the value below which 75% of the data falls. Any value outside of the interquartile range (IQR), which is defined as the difference between the third and first quartiles, multiplied by a factor (typically 1.5 or 3), is considered an outlier. To clamp outliers using the quartile method, values outside of the IQR are replaced with the closest value within the range of the IQR. This process helps to reduce the influence of extreme values on statistical analysis and modeling. After removing unnecessary observations and fixing the outliers, data, we recognized that 1.86% of the observations had been missed. Now, we have 68699 observations in the dataset. The boxplot after fixing the outliers is as below:
 
+```python
+
+outliers = len(data[(data["ap_hi"]>=250)])+len(data[(data["ap_hi"]<0)])+len(data[(data["ap_lo"]>=200)])+len(data[(data["ap_lo"]<0)])
+print(f'percent missing: {round(outliers/len(data)*100,1)}%')
+
+```
+
+
+```python
+
+#Filtering out the unrealistic data of Systolic blood pressure and Diastolic blood pressure
+data = data[ (data['ap_lo'] >= 0) & (data['ap_hi'] >= 0) ]  #remove negative values
+data = data[ (data['ap_lo'] < 200) & (data['ap_hi'] < 250) ]  #remove fishy data points
+data = data[ (data['ap_lo'] < data['ap_hi']) ]  #remove systolic higher than diastolic
+```
+```python
+num_cols = ['age','height','weight','ap_hi','ap_lo']
+plt.figure(figsize=(18,9))
+data[num_cols].boxplot()
+plt.title("Numerical variables in the dataset", fontsize=20)
+plt.show()
+```
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/a1500c64-9983-4cef-9624-6ed2aa3605a3)
 
@@ -75,7 +118,35 @@ After clamping outliers using the quartile method, it is important to check that
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/20550b4a-28ba-45b4-bdd3-796c2bc0bbb0)
 
+```python
+fig = make_subplots(rows=2, cols=2, subplot_titles=("Height Distribution", "Weight Distribution","ap_hi","ap_lo"))
 
+trace0 = go.Histogram(x=data['height'], name = 'Height')
+trace1 = go.Histogram(x=data['weight'], name = 'Weight')
+trace2 = go.Histogram(x=data['ap_hi'], name = 'ap_hi')
+trace3 = go.Histogram(x=data['ap_lo'], name = 'ap_lo')
+
+fig.append_trace(trace0, 1, 1)
+fig.append_trace(trace1, 1, 2)
+fig.append_trace(trace2, 2, 1)
+fig.append_trace(trace3, 2, 2)
+
+fig.update_xaxes(title_text="Height", row=1, col=1)
+fig.update_yaxes(title_text="Total Count", row=1, col=1)
+
+fig.update_xaxes(title_text="Weight", row=1, col=2)
+fig.update_yaxes(title_text="Total Count", row=1, col=2)
+
+fig.update_xaxes(title_text="ap_hi", row=2, col=1)
+fig.update_yaxes(title_text="Total Count", row=2, col=1)
+
+fig.update_xaxes(title_text="ap_lo", row=2, col=2)
+fig.update_yaxes(title_text="Total Count", row=2, col=2)
+
+fig.update_layout(title_text="Histograph", height=700)
+
+fig.show()
+```
 ### Distribution after fixing the outliers:
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/75a70115-9495-4848-8933-72ace73b3879)
@@ -83,6 +154,23 @@ After clamping outliers using the quartile method, it is important to check that
 
 So, we can see that fixing the outliers with the clamping method did not change the distribution and statistical description of the data. Meanwhile, We have plotted the bar chart of the target variable, and as can be seen; the data set was balanced as 33989 patients had CVD and 34710 patients had not CVD. 
 
+#Dataset after cleaning
+
+```python
+print(f'Number of rows of cardio dataset after data preprocessing: {len(data)}')
+print(f'How much percent missing: {round((70000-len(data))/70000*100,2)}%')
+
+cardio = data['cardio'].value_counts()
+plt.figure(figsize=(7, 6))
+ax = cardio.plot(kind='bar', rot=0, color=['#ADD8E6','#7BC8F6'])
+ax.set_title("Cardiovascular Heart Disease Presense", y = 1)
+ax.set_xlabel('cardio')
+ax.set_ylabel('Frequency')
+ax.set_xticklabels(('0', '1'))
+
+counts = data['cardio'].value_counts()
+print(counts)
+```
 
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/ff822e36-d1ad-4ae6-998a-92358a7b80b0)
@@ -98,6 +186,38 @@ So, we can see that fixing the outliers with the clamping method did not change 
 
 - The relationship between categorical variables with target variable:
 
+```python
+  rcParams['figure.figsize'] = 18, 8
+sns.set_palette("Paired")
+sns.countplot(x='age', hue='cardio', data = data);
+
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='cholesterol', hue='cardio', data = data);
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='gluc', hue='cardio', data = data);
+
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='smoke', hue='cardio', data = data);
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='alco', hue='cardio', data = data);
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='active', hue='cardio', data = data);
+
+rcParams['figure.figsize'] = 11, 8
+sns.set_palette("Paired")
+sns.countplot(x='gender', hue='cardio', data = data);
+```
+
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/98696764-be59-4814-bd7d-3895e9ef4786)
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/2abb20b6-830b-437c-987d-d46e91b4cf8b)
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/07913caa-1628-4bb0-9315-23ae1defad56)
@@ -110,10 +230,25 @@ Individuals who have cardiovascular disease (CVD) tend to exhibit elevated level
 
 - In the dataset, 44742 are women and 23957 are men, and below is the crosstab presentation of how the target class is distributed among men and women;
 
+```python
+data.groupby('gender')['height'].mean()
+data['gender'].value_counts()
+data.groupby('gender')['alco'].sum()
+pd.crosstab(data['cardio'],data['gender'],normalize=True)
+```
 
 <img width="286" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/763f5143-dc50-4049-90dd-293646e46291">
 
 - **Multivariate Analysis**: We can observe that Systolic blood pressure and Diastolic blood pressure are the most correlated variables with the target variable.
+
+```python
+  corr = data.corr()
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+# Generate a mask for the upper triangle
+mask = np.zeros_like(corr, dtype=np.bool)
+mask[np.triu_indices_from(mask)] = True
+```
+
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/29e86035-ce04-4509-8ce9-47a7a2f22241)
 
@@ -126,6 +261,24 @@ Pulse pressure is an additional indicator of cardiovascular wellbeing. Pulse Pre
 
 **Feature Selection**
 
+```python
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+# Draw the heatmap with the mask and correct aspect ratio
+sns.heatmap(corr, mask=mask, cmap="YlGnBu", vmax=.3, center=0,annot = True,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5});
+
+data['BMI'] = data['weight'] / data['height'] / data['height'] * 10000
+
+data['pulse pressure'] = data['ap_hi'] - data['ap_lo']
+```
+```python
+plt.rcParams['figure.figsize'] = (20, 15) 
+sns.heatmap(data.corr(), annot = True, linewidths=.5, cmap="PuBu")
+plt.title('Corelation Between Features', fontsize = 30)
+plt.show()
+```
 
 ![image](https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/d21b6c19-7c38-40fd-be02-f4c6d8db0d03)
 
@@ -139,12 +292,48 @@ The feature alcohol has the lowest correlation with the target feature. Also, fe
 
 The ratio of the training set to the test set can vary depending on the size and complexity of the dataset, but a common ratio is 80% for training and 20% for testing. By using a train-test split, we can avoid overfitting the model to the training data, which would result in poor performance on new data. In this scenario, we will be using the commonly used split ratio of 80:20, which means that 80% of the dataset will be used for training the model, and the remaining 20% of the dataset will be used for testing the model. In this project, we used random forest and KNN algorithms to model the data. 
 
+```python
+
+#Train-test-split for non-scaled data
+X = data.drop(['cardio','height','alco'], axis=1) #features 
+y = data['cardio']  #target feature
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle = True)
+#Splitted Data
+print('X_train shape is ' , X_train.shape)
+print('X_test shape is ' , X_test.shape)
+print('y_train shape is ' , y_train.shape)
+print('y_test shape is ' , y_test.shape)
+```
 
 
 ## Performance Evaluation 
 
 
 Confusion Matrix Parameters
+
+```python
+
+# Random Forest
+
+rf = RandomForestClassifier(n_estimators=700, random_state=42)
+rf.fit(X_train, y_train)
+
+# Use the predict_proba() method to obtain the predicted probabilities
+y_proba = rf.predict_proba(X_test)[:, 1]
+```
+
+```python
+
+# Evaluate the performance of your model at different decision thresholds
+for threshold in [0.3, 0.4, 0.5, 0.6, 0.7]:
+    y_pred = (y_proba > threshold).astype(int)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_proba)
+    print(f"Threshold: {threshold:.1f}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1-score: {f1:.3f}, AUC: {auc:.3f}")
+```
 
 
 <img width="500" alt="image" src="https://github.com/Masoumeh89/Machine-Learning-Project-1/assets/74910834/0b253150-3e14-4124-964a-91d9998a0c4a">
