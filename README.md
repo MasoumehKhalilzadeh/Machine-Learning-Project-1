@@ -40,9 +40,13 @@ In this project, a dataset of 70000 patients has been analyzed which includes 11
 The required steps for model building to predict CVD are as follows:
 
 **Step 1:** Data cleaning and pre-processing have been implemented by eliminating improper values and removing outliers from the observation. 
+
 **Step 2:** EDA (Exploratory Data Analysis) has been performed to analyze and summarize data sets to gain insights into the underlying patterns, distributions, and relationships between variables.
+
 **Step 3:** Feature engineering and feature selection have been performed to choose the proper attributes that are more helpful in CVD prediction.
+
 **Step 4:** Random forest, KNN, and Logistic Regression algorithms are chosen to classify the selected features.
+
 **Step 5:** Performance measures are evaluated to gain proper results from the models.
 
 
